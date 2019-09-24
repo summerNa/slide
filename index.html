@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+<style type="text/css">
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	ul,li{
+		list-style-type: none;
+
+	}
+	#slide{
+		height: 400px;
+		width: 600px;
+		margin: 100px auto;
+		position: relative;
+		overflow: hidden;
+	}
+	.slide-box{
+		width: 2400px;
+		height: 400px;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.slide-box li{
+		float: left;
+	}
+	.slide-box li img{
+		width: 600px;
+		height: 400px;
+	}
+	.btn{
+		opacity: 0;
+		position: absolute;
+		top: 50%;
+		height: 50px;
+		width: 50px;
+		border-radius: 5px;
+		cursor: pointer;
+		user-select: none;
+		background: white;
+		font-size: 25px;
+		line-height: 50px;
+		text-align: center;
+		transition: all 1s;
+		transform: translateY(-50%);
+	}
+	.next{
+		right: 0;
+	}
+	.icon-list{
+		position: absolute;
+		bottom: 10px;
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	.icon-list li{
+		float: left;
+		margin: 0 5px;
+		height: 10px;
+		width: 10px;
+		border-radius: 50%;
+		background: #ccc;
+		cursor: pointer;
+	}
+	.icon-list .active{
+		background: #fff;
+	}
+</style>
+</head>
+<body>
+<!-- 
+  逻辑：
+  slide容器：给固定的宽高，超出的overflow：hidden；
+  slide-box容器：相对于slide绝对定位absolute，宽度设置为 卡片的个数 * 每个卡片的宽度，并且让卡片float
+  li：宽高等于slide容器的宽高
+
+  为了让卡片看起来是无限的循环滚动，将第一个li复制一份放到最后面
+ -->
+<div id="slide">
+	<ul class="slide-box">
+		<li><img src="img/a1.jpg"></li>
+		<li><img src="img/a2.jpg"></li>
+		<li><img src="img/a3.jpg"></li>
+		<li><img src="img/a1.jpg"></li>
+	</ul>
+	<div class="btn next">&gt;</div>
+	<div class="btn prev">&lt;</div>
+	<ul class="icon-list">
+		<li class="active"></li>
+		<li></li>
+		<li></li>
+	</ul>
+</div>
+
+<script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		var timer = null; //声明一个全局定时器
+		var index = 0;	
+		$(".next").click(function(){ //下一张
+			next();
+		});
+		$(".prev").click(function(){ //上一张
+			prev();
+		})
+		function next(){
+			index++;
+			if(index > 2){
+				/*
+				当图片到最后一张时跳回第一张，本例中在最后一张中放入了第一张的图片，为实现无缝切换图片的效果。
+				*/
+				 $(".slide-box").animate({left:-(index)*600},500); 
+				 index = 0;
+				 $(".slide-box").animate({left:0},0); //
+			}
+			$(".slide-box").animate({left:-index*600},500);
+			iconHover(index);
+		}
+		function prev(){
+			index--;
+			if(index < 0 ){
+				index = 2;
+				$(".slide-box").animate({left:-(index+1)*600},0);
+			}
+			$(".slide-box").animate({left:-index*600},500);
+			iconHover(index);
+		}
+		function auto(){ 
+			timer = setInterval(function(){ //设置自动播放的定时器
+				next();
+				iconHover(index);
+		},2000) 
+		}
+		auto();
+		$("#slide").mouseover(function(){ //鼠标移入 定时器取消
+			clearInterval(timer);
+			$('.btn').css("opacity",0.5)
+		})
+		$("#slide").mouseleave(function(){ //鼠标离开 定时器开启
+			auto();
+			$('.btn').css("opacity",0)
+		})
+		//鼠标碰触圆点图标实现图片左右轮播
+		$(".icon-list li").mouseover(function(){ 
+			var index = $(this).index();
+			$(".slide-box").animate({left:-index*600},500);
+			iconHover(index);
+		})
+		//实现被选图片对应圆点图标索引更新
+		function iconHover(index){
+			$(".icon-list li").eq(index).addClass("active").siblings().removeClass("active");
+		}
+		
+	})
+</script>
+
+</div>
+</body>
+</html>
